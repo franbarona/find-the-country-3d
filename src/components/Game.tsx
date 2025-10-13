@@ -88,11 +88,11 @@ export default function Game () {
     setTimeLeft(60);
     setGameOver(false);
     setTargetCountry(pickRandomCountry(countries));
-    setIsStarted(false); // vuelve al modal inicial
+    setIsStarted(false);
   };
 
   return (
-    <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
+    <div className='w-[100vw] h-[100vh] overflow-hidden'>
       {!isStarted && <StartGameModal onStart={() => setIsStarted(true)} />}
       {isStarted && <GameHeader timeLeft={timeLeft} targetCountry={targetCountry} score={score} prevScore={prevScore.current} />}
       <GlobeView countries={countries} highlights={highlights} onCountryClick={handleCountryClick} isStarted={isStarted} gameOver={gameOver} />

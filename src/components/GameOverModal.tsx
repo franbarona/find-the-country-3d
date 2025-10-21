@@ -1,7 +1,7 @@
-import confetti from "canvas-confetti";
-import CountUp from "./CountUp";
-import GameButton from "./GameButton";
-import { useEffect, useState } from "react";
+// import confetti from "canvas-confetti";
+import CountUp from "./animate-ui/CountUp";
+import GameButton from "./Buttons";
+// import { useEffect, useState } from "react";
 import Copyright from "./Copyright";
 
 interface GameOverModalProps {
@@ -11,20 +11,20 @@ interface GameOverModalProps {
 
 export default function GameOverModal ({ score, onRestart }: GameOverModalProps) {
 
-  const [showConfetti, setShowConfetti] = useState(false);
+  // const [showConfetti, setShowConfetti] = useState(false);
 
 
   // Configurar confetti
-  useEffect(() => {
-    setTimeout(() => {
-      if (score > 0)
-        setShowConfetti(true);
-    }, 1500)
-  }, [score]);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     if (score > 0)
+  //       setShowConfetti(true);
+  //   }, 1500)
+  // }, [score]);
 
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 bg-[rgba(0,0,0,0.6)] flex items-center justify-center z-20 text-white">
-      {showConfetti &&
+      {/* {showConfetti &&
 
         <div className="absolute top-0 left-0 right-0 bottom-0 z-10">{
           confetti({
@@ -37,7 +37,7 @@ export default function GameOverModal ({ score, onRestart }: GameOverModalProps)
             }
           })
         }</div>
-      }
+      } */}
       <div className="relative inline-flex items-center w-[90%] md:w-[450px] justify-center p-[1px] text-md font-medium text-center">
         <div className="relative transition-all ease-in duration-1000 p-10 flex flex-col gap-5 w-full overflow-hidden">
           <div className="relative w-full h-full overflow-hidden">

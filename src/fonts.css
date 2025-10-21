@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'Font1';
+  src: url('./assets/fonts/the-bomb-sound.regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Font2';
+  src: url('./assets/fonts/crackman.regular.otf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

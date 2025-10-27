@@ -3,9 +3,8 @@ import NavButton from "./Buttons";
 import Copyright from "./Copyright";
 
 interface StartGameModalProps {
-  onStart: () => void;
+  readonly onStart: () => void;
 }
-
 
 export default function StartGameModal({ onStart }: StartGameModalProps) {
   return (

@@ -22,8 +22,8 @@ const NextCountryButton = ({ action, timeLeftToNext, disabled }: NextCountryButt
     <div className="relative border-2 border-amber-400 rounded-lg flex items-center justify-center p-2">
       {
         timeLeftToNext > 0 && (
-          <span className="absolute w-full  text-sm text-white font-light select-none z-10 text-center">
-           Next in {timeLeftToNext}s
+          <span className="absolute w-full h-full text-sm text-white font-light select-none z-10 text-end pr-2 pt-1">
+           {timeLeftToNext}
           </span>
         )
       }

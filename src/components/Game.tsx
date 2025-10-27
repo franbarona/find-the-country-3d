@@ -1,10 +1,5 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import {
-  europeanCountries,
-  type CountryFeature,
-  type HighlightMap,
-} from "./types";
-import GameHeader from "./GameHeader";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { type CountryFeature, type HighlightMap } from "./types";
 import GameOverModal from "./GameOverModal";
 import GlobeView from "./GlobeView";
 import StartGameModal from "./StartGameModal";
@@ -27,25 +22,19 @@ export default function Game() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [streak, setStreak] = useState(0);
 
-  // Memoizar función de selección aleatoria
-  const pickRandomCountry = useCallback(
-    (list: CountryFeature[], highlights: HighlightMap): string => {
-      // Filtrar países que no estén en highlights
-      const availableCountries = list.filter(
-        (country) => !(country.properties.name in highlights)
-      );
+  const pickRandomCountry = useCallback((list: CountryFeature[]): string => {
+    const availableCountries = list.filter(
+      (country) =>
+        !Object.keys(highlights).includes(country.properties.name)
+    );
 
-      // Si no quedan países disponibles, podrías retornar null o manejar el caso
-      if (availableCountries.length === 0) {
-        throw new Error("No hay países disponibles");
-        // O retornar null, o resetear, según tu lógica
-      }
+    if (availableCountries.length === 0) {
+      setGameOver(true);
+    }
 
-      const randomIndex = Math.floor(Math.random() * availableCountries.length);
-      return availableCountries[randomIndex].properties.name;
-    },
-    []
-  );
+    const randomIndex = Math.floor(Math.random() * availableCountries.length);
+    return availableCountries[randomIndex].properties.name;
+  }, []);
 
   // Cargar países solo una vez
   useEffect(() => {
@@ -57,12 +46,7 @@ export default function Game() {
       .then((res) => res.json())
       .then((data) => {
         if (isMounted) {
-          console.log(data.features);
           setCountries(data.features);
-          // const europeanCountryFeatures = data.features.filter((country: CountryFeature) =>
-          //   europeanCountries.includes(country.properties.name)
-          // );
-          // setCountries(europeanCountryFeatures);
           setTargetCountry("Spain");
         }
       })
@@ -76,14 +60,8 @@ export default function Game() {
   // Resetear ronda con useCallback optimizado
   const resetRound = useCallback(() => {
     if (countries.length === 0) return;
-    // setHighlights({});
-    const correctCountries = clearIncorrectCountries(highlights);
-    setHighlights(correctCountries);
 
-    setTargetCountry(
-      pickRandomCountry(countries, clearIncorrectCountries(highlights))
-    );
-    // setTargetCountry("Japan");
+    setTargetCountry(pickRandomCountry(countries));
   }, [countries, pickRandomCountry]);
 
   useEffect(() => {
@@ -124,6 +102,14 @@ export default function Game() {
     };
   }, [gameOver, isStarted]);
 
+  const getOnlyCorrectCountries = () => {
+    return Object.fromEntries(
+      Object.entries(highlights).filter(
+        ([key, value]) => key && value === "correct"
+      )
+    );
+  };
+
   // Actualizar score anterior
   useEffect(() => {
     prevScore.current = score;
@@ -136,11 +122,9 @@ export default function Game() {
       if (!targetCountry || gameOver || !isStarted) return;
 
       if (name === targetCountry) {
+        const newHighlights = getOnlyCorrectCountries();
         // Acierto
-        setHighlights((prev) => ({
-          ...prev,
-          [name]: "correct",
-        }));
+        setHighlights({ ...newHighlights, [name]: "correct" });
 
         // Batch updates
         setTimeLeft((prev) => prev);
@@ -150,13 +134,7 @@ export default function Game() {
         // Incrementar racha DESPUÉS de actualizar highlights
         const newStreak = streak < 5 ? streak + 1 : streak;
         setStreak(newStreak); // Incrementar en 1
-
-        // Usar requestAnimationFrame para mejor rendimiento
-        const timeoutId = setTimeout(() => {
-          resetRound();
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
+        resetRound();
       } else {
         // Error - resetear racha
         setStreak(0);
@@ -164,19 +142,14 @@ export default function Game() {
           ...prev,
           [name]: "incorrect",
         }));
-        setScore((prev) => Math.max(0, prev - 1));
+        setScore((prev) => (prev - 1 >= 0 ? prev - 1 : 0));
       }
     },
-    [targetCountry, gameOver, isStarted, resetRound, streak]
+    [targetCountry, gameOver, isStarted, streak]
   );
-
-  useEffect(() => {
-    console.log(highlights);
-  }, [highlights]);
 
   // Reiniciar juego optimizado
   const restartGame = useCallback(() => {
-    console.log("paso");
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -188,9 +161,7 @@ export default function Game() {
     setTimeLeft(GAME_TIME);
     setGameOver(false);
     setTargetCountry(
-      countries.length > 0
-        ? pickRandomCountry(countries, clearIncorrectCountries(highlights))
-        : null
+      countries.length > 0 ? pickRandomCountry(countries) : null
     );
     setIsStarted(false);
   }, [countries, pickRandomCountry]);
@@ -200,20 +171,10 @@ export default function Game() {
     setIsStarted(true);
   }, []);
 
-  const clearIncorrectCountries = (obj: HighlightMap): HighlightMap => {
-    const newObj: HighlightMap = { ...obj };
-    for (const key in newObj) {
-      if (newObj[key] === "incorrect") {
-        delete newObj[key];
-      }
-    }
-    return newObj;
-  };
-
   const handleNext = () => {
-    setTargetCountry(
-      pickRandomCountry(countries, clearIncorrectCountries(highlights))
-    );
+    const newHighlights = getOnlyCorrectCountries();
+    setHighlights({ ...newHighlights });
+    resetRound();
     setTimeLeftToNext(TIME_TO_UNLOCK_NEXT);
   };
 
@@ -230,8 +191,16 @@ export default function Game() {
               <div className="w-full">
                 <CountryToFind country={targetCountry} />
               </div>
-              <div className={`w-fit pt-2 ${timeLeftToNext > 0 ? "opacity-50" : "opacity-100"} cursor-pointer`}>
-                <NextCountryButton action={handleNext} timeLeftToNext={timeLeftToNext} disabled={timeLeftToNext > 0} />
+              <div
+                className={`w-fit pt-2 ${
+                  timeLeftToNext > 0 ? "opacity-50" : "opacity-100"
+                } cursor-pointer`}
+              >
+                <NextCountryButton
+                  action={handleNext}
+                  timeLeftToNext={timeLeftToNext}
+                  disabled={timeLeftToNext > 0}
+                />
               </div>
             </div>
           </div>

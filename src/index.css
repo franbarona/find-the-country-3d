@@ -1,14 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import './fonts.css';
-
-
 @custom-variant dark (&:is(.dark *));
 
 body {
-  /* font-family: "Bungee", sans-serif; */
   font-family: "CCThatsAllFolks Bold", sans-serif;
-  /* font-family: "Open Sans", sans-serif; */
 }
 
 .font-bungee {

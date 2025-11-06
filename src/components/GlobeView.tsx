@@ -102,7 +102,7 @@ export default function GlobeView({ countries, highlights, onCountryClick, isSta
     controls.maxDistance = isMobile ? 600 : 350;
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.autoRotateSpeed = 0.5;
+    controls.autoRotateSpeed = 0.4;
     controls.rotateSpeed = 0.5;
     
     // Deshabilitar zoom con scroll en móvil para mejor UX
